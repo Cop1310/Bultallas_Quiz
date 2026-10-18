@@ -1,0 +1,375 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0b141a">
+<title>¿Quién lo dijo? · Bultallas</title>
+<style>
+:root{
+  --bg:#0b141a; --panel:#111b21; --bubble:#202c33; --line:#2a3942;
+  --text:#e9edef; --muted:#8696a0; --accent:#00a884; --accent-2:#25d366;
+  --ok:#1faa59; --ok-bg:#12382a; --bad:#e5484d; --bad-bg:#3b1a1d; --gold:#f5c542;
+  --r:16px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Color Emoji",sans-serif}
+body{background:
+  radial-gradient(1200px 500px at 50% -10%,#10303a 0%,transparent 60%),var(--bg);
+  padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+.app{max-width:640px;margin:0 auto;padding:16px;min-height:100dvh;display:flex;flex-direction:column}
+.screen{display:none;flex:1;flex-direction:column;animation:in .25s ease}
+.screen.on{display:flex}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+button{font:inherit;color:inherit;cursor:pointer;border:0}
+
+/* ---------- inicio ---------- */
+.hero{margin:auto 0;text-align:center;padding:12px 0}
+.cover{width:100%;max-height:260px;object-fit:cover;border-radius:var(--r);margin-bottom:22px;display:none;border:1px solid var(--line)}
+.cover.ok{display:block}
+.logo{font-size:56px;line-height:1;margin-bottom:8px}
+h1{font-size:34px;line-height:1.1;margin:0 0 10px;letter-spacing:-.5px}
+h1 span{color:var(--accent-2)}
+.sub{color:var(--muted);margin:0 auto 28px;max-width:30ch;line-height:1.45}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;background:var(--accent);color:#04120e;
+  font-weight:700;font-size:18px;padding:15px 30px;border-radius:999px;transition:transform .12s,filter .12s}
+.btn:active{transform:scale(.97)}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent;color:var(--text);border:1px solid var(--line)}
+.meta{color:var(--muted);font-size:13px;margin-top:18px}
+
+/* ---------- juego ---------- */
+.top{display:flex;align-items:center;gap:12px;margin:4px 0 18px}
+.prog{flex:1;height:8px;background:var(--panel);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.prog i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent-2));transition:width .35s ease}
+.count{font-variant-numeric:tabular-nums;color:var(--muted);font-size:14px;min-width:46px;text-align:right}
+.score{color:var(--gold);font-weight:700;font-size:14px;min-width:46px}
+
+.chat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:18px 14px 16px;margin-bottom:16px;
+  background-image:radial-gradient(circle at 20% 0,#142229 0,transparent 55%)}
+.date{display:block;width:max-content;max-width:100%;margin:0 auto 14px;background:#182229;color:var(--muted);font-size:12.5px;
+  padding:5px 12px;border-radius:8px;text-align:center}
+.date:first-letter{text-transform:uppercase}
+.bubble{position:relative;background:var(--bubble);border-radius:4px 14px 14px 14px;padding:12px 14px 10px;
+  font-size:17px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;box-shadow:0 1px 1px rgba(0,0,0,.35);max-width:96%}
+.bubble:before{content:"";position:absolute;left:-7px;top:0;border:7px solid transparent;border-top-color:var(--bubble);border-right-color:var(--bubble)}
+.bubble .who{display:block;color:var(--accent-2);font-weight:700;font-size:14px;margin-bottom:4px;transition:color .2s}
+.bubble.hidden .who{color:var(--muted);letter-spacing:2px}
+.q{font-size:15px;color:var(--muted);margin:0 2px 10px}
+
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:420px){.opts{grid-template-columns:1fr}}
+.opt{display:flex;align-items:center;gap:12px;text-align:left;background:var(--panel);border:2px solid var(--line);
+  border-radius:14px;padding:10px 12px;min-height:64px;transition:border-color .15s,background .15s,transform .1s}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt:active:not(:disabled){transform:scale(.98)}
+.opt:disabled{cursor:default}
+.opt .nm{font-weight:650;font-size:16px;line-height:1.2}
+.opt.sel{border-color:var(--accent-2);background:#0f2a26;box-shadow:0 0 0 2px rgba(37,211,102,.25)}
+.opts.photos{grid-template-columns:1fr 1fr!important;gap:12px}
+.opt.ph{padding:0;overflow:hidden;aspect-ratio:4/5;min-height:0;border-radius:16px;position:relative;background:#182229}
+.opt.ph img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.opt.ph .bgb{position:absolute;inset:-12px;background-size:cover;background-position:center;filter:blur(14px) brightness(.5)}
+.opt.ph .tick{position:absolute;right:8px;top:8px;width:28px;height:28px;border-radius:50%;background:var(--accent-2);color:#04120e;display:none;place-items:center;font-weight:800}
+.opt.ph.sel .tick{display:grid}
+.opt.right{border-color:var(--ok);background:var(--ok-bg)}
+.opt.wrong{border-color:var(--bad);background:var(--bad-bg)}
+.opt.dim{opacity:.45}
+.opt .mark{margin-left:auto;font-size:20px}
+
+.av{width:44px;height:44px;border-radius:50%;flex:none;position:relative;overflow:hidden;display:grid;place-items:center;
+  font-size:24px;background:var(--c,#2a3942);border:2px solid rgba(255,255,255,.08)}
+.av img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.av.sm{width:34px;height:34px;font-size:18px}
+
+.next{margin-top:16px;display:flex;justify-content:center;min-height:56px}
+.next .btn{display:none}
+.next .btn.on{display:inline-flex}
+
+/* ---------- resultado ---------- */
+.res-head{text-align:center;margin:8px 0 18px}
+.big{font-size:72px;font-weight:800;line-height:1;letter-spacing:-2px}
+.big small{font-size:28px;color:var(--muted);font-weight:600;letter-spacing:0}
+.verdict{margin:8px 0 0;color:var(--muted);font-size:17px}
+.list{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.row{background:var(--panel);border:1px solid var(--line);border-left:5px solid var(--bad);border-radius:12px;padding:12px 14px}
+.row.ok{border-left-color:var(--ok)}
+.row .msg{font-size:14.5px;line-height:1.45;color:#cfd8dc;white-space:pre-wrap;overflow-wrap:anywhere;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0 0 10px}
+.row .msg.open{display:block}
+.row .d{color:var(--muted);font-size:12px;margin-bottom:6px}
+.ans{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:14px}
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 5px;border-radius:99px;background:#182229;border:1px solid var(--line)}
+.chip.good{border-color:var(--ok);background:var(--ok-bg)}
+.chip.bad{border-color:var(--bad);background:var(--bad-bg);text-decoration:line-through;text-decoration-color:rgba(229,72,77,.7)}
+.chip .lbl{color:var(--muted);font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;margin-right:2px;text-decoration:none;display:inline-block}
+.toggle{background:none;color:var(--accent-2);font-size:12.5px;padding:0;margin:-4px 0 10px}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;padding-bottom:20px}
+.empty{padding:40px 10px;text-align:center;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- INICIO -->
+  <section class="screen on" id="s-start">
+    <div class="hero">
+      <img class="cover" id="cover" alt="">
+      <div class="logo" id="logo">💬</div>
+      <h1>¿Quién <span>lo dijo</span>?</h1>
+      <p class="sub">Mensajes del grupo, sacados de años de chat. Adivina quién los escribió.</p>
+      <button class="btn" id="play">Jugar</button>
+      <div class="meta">10 mensajes · 4 opciones cada uno</div>
+    </div>
+  </section>
+
+  <!-- JUEGO -->
+  <section class="screen" id="s-game">
+    <div class="top">
+      <div class="score" id="score"></div>
+      <div class="prog"><i id="bar"></i></div>
+      <div class="count" id="count">1/10</div>
+    </div>
+    <div class="chat">
+      <span class="date" id="date"></span>
+      <div class="bubble" id="bubble"><span id="text"></span></div>
+    </div>
+    <p class="q">¿Quién lo escribió?</p>
+    <div class="opts" id="opts"></div>
+    <div class="next"><button class="btn" id="next">Siguiente →</button></div>
+  </section>
+
+  <!-- RESULTADO -->
+  <section class="screen" id="s-end">
+    <div class="res-head">
+      <div class="big"><span id="final">0</span><small>/10</small></div>
+      <p class="verdict" id="verdict"></p>
+    </div>
+    <div class="list" id="list"></div>
+    <div class="actions">
+      <button class="btn" id="again">Jugar otra vez</button>
+      <button class="btn ghost" id="share">Compartir resultado</button>
+    </div>
+  </section>
+
+</div>
+
+<script id="data" type="application/json">{"members":[{"id":"balda","n":"Balda","e":"🐟"},{"id":"josete","n":"Josete","e":"🧓"},{"id":"rober","n":"Rober","e":"🐶"},{"id":"dani","n":"Dani","e":"🧻"},{"id":"javi","n":"Javi","e":"🎱"},{"id":"rafa","n":"Rafa Ojeda","e":"👩‍🦼"},{"id":"cesar","n":"César","e":"🫶🏽"},{"id":"gusrojo","n":"Gus Rojo","e":"🥋"},{"id":"peter","n":"Peter","e":"👨🏼‍🔬"},{"id":"david","n":"David","e":"👮🏼‍♂️"},{"id":"gus","n":"Gus","e":"🌳"},{"id":"salvi","n":"Salvi","e":"👨🏿‍🔧"},{"id":"juli","n":"Juli","e":"🚬"},{"id":"karpanta","n":"Javi Karpanta","e":"🔝"},{"id":"julito","n":"Julito Bultallas","e":"⛸️"},{"id":"jorjos","n":"Jorjos","e":"🤯"},{"id":"filete","n":"Filete","e":"🍩"},{"id":"dperez","n":"D Perez","e":"🥅"},{"id":"porra","n":"Porra","e":"🎠"},{"id":"alain","n":"Alain","e":"🇺🇾"},{"id":"jocky","n":"Jocky","e":"🎸"},{"id":"chino","n":"Chino","e":"🎾"},{"id":"antonio","n":"Antonio Bultalla","e":"🧹"},{"id":"huesa","n":"Huesa","e":"🤓"},{"id":"julio","n":"Julio","e":"🥃"}],"act":{"2020":["alain","balda","cesar","chino","dani","david","dperez","filete","gus","gusrojo","javi","jocky","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"],"2021":["alain","antonio","balda","cesar","chino","dani","david","dperez","filete","gus","gusrojo","javi","jocky","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"],"2022":["alain","antonio","balda","cesar","chino","dani","david","dperez","filete","gus","gusrojo","huesa","javi","jocky","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"],"2023":["alain","antonio","balda","cesar","chino","dani","david","dperez","filete","gus","gusrojo","huesa","javi","jocky","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"],"2024":["alain","antonio","balda","cesar","chino","dani","david","dperez","filete","gus","gusrojo","huesa","javi","jocky","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"],"2025":["alain","antonio","balda","cesar","chino","dani","david","dperez","filete","gusrojo","huesa","javi","jocky","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"],"2026":["alain","antonio","balda","cesar","chino","dani","david","dperez","filete","gus","gusrojo","huesa","javi","jorjos","josete","juli","julio","julito","karpanta","peter","porra","rafa","rober","salvi"]},"qs":[{"t":"hombre, teniendo en cuenta que esas entradas se venderán como churros, yo hubiese dicho a todas sus amiguillas que cada una intentase pillar 3; luego te las quitas de encima con facilidad en ticketswap e incluso le sacas 10 euretes por cada una","d":"2026-03-26","a":"rafa"},{"t":"Que va, ella tiene panoja y se ha pirado de vacaciones; yo como ando tieso aquí me tienes comprando en el Carrefour con un colega qué me ha acompañado y ahora le pondré algo de alpiste en casa por los servicios prestados","d":"2023-04-06","a":"rafa"},{"t":"Sin ser experto en nada, yo tengo un freesat v7 (ahora gtmedia) y va de lujo. A mis padres les puse el gtmedia v8 nova y no va tan estable. Esta es mi experiencia, y me pillaria el v7 aunque fuese de tercera mano","d":"2021-07-27","a":"rafa"},{"t":"Nos ha jodido, que me dejó 60 pavos el finde en taxis? A lo k me refiero es k si me voy al de al lado con la luz me cobrará algo similar, no va a ser un gran ahorro. Si no lo quieres entender, allá tu","d":"2022-03-23","a":"rafa"},{"t":"vamos a ver canelo, sabes cuantos kms he hecho los últimos 3 años? como para tener un coche nuevo cogiendo polvo en el garaje y pagando más seguro que el que tengo; el problema es que ahora no me pasa la itv","d":"2022-07-30","a":"rafa"},{"t":"No estoy puesto, yo las acciones que tengo son del Nasdaq pero eso es complejo porque entre comisiones por el cambio de divisas , tributación por beneficios y demás igual Te cuesta más el collar que el perro","d":"2025-04-07","a":"rafa"},{"t":"FYI. Para los cumpleaños del 30Nov contamos con un presupuesto de 500 pavos hasta donde de; se recomienda llevar bocadillos y se aceptan donaciones o celebrantes adicionales.","d":"2024-11-12","a":"rafa"},{"t":"jjajajajaja tendría sentido si dijese que se queda Zinade chillo, y si se va zidane lloro; pero esto no tiene nada k ver con gatas flora","d":"2021-05-16","a":"rafa"},{"t":"Reserve para 6 u 8, tengo que pasarme a decirles si hay hueco para 12, ayer cerraban por la tarde. Traete la cuerda para ponérsela al Filete.","d":"2022-07-19","a":"chino"},{"t":"Voy a ir con el filete y unos del pueblo el jueves 27, sesión de dia, voy a pillar las entradas hoy a las 20.00, si alguien se apunta que me diga","d":"2023-04-20","a":"chino"},{"t":"Mañana vuelvo a decir los que vamos a la comida del miércoles, recuerdo que la cocina cierra a las 16.30 para los que piensen llegar tarde os🚗","d":"2022-07-17","a":"chino"},{"t":"Estoy en casa de Pep que le ayudado con una tv, voy a hacer la comida a mi padre y a las 13.00 estaremos por alli","d":"2020-12-12","a":"chino"},{"t":"El que quieras Salvi que veo que te borras de organizar la siguiente comida ahora que le estabas pillando el gustillo","d":"2022-11-09","a":"chino"},{"t":"En el pueblo tengo seguro, vengo de allí, si lo veo antes te la había llevado.\nEl sábado vuelvo, te la puedo dar la semana que viene","d":"2023-06-22","a":"chino"},{"t":"Viendo cervezas, he quedado con DP para tomar unas por el barrio por si alguien se anima","d":"2026-09-26","a":"chino"},{"t":"Estoy como pancarta ayer buscando a Nacho Cano, cambio de canal pero no encuentro los saltos de esquí","d":"2021-01-01","a":"chino"},{"t":"Tiene pinta que se ha gastado 100 pavos en copas y no pilla un taxi por 20 para ver a su Reala","d":"2026-04-18","a":"chino"},{"t":"Ojeda pregunta a Raúl cuanto paga por la luz que Rober contó ayer una milonga","d":"2022-04-29","a":"chino"},{"t":"Yo hice 3 fiestas en rko, un sorteo de una bici que SOLO di 50 papeletas a mi familia, 200 mecheros...eso sí!!..saque pasta para el viaje,los gastos, regalos y hasta para las vacaciones....el mundo es para los espabilados😜😜","d":"2022-03-14","a":"jorjos"},{"t":"Ayer tiré yo 9 móviles y 3 tablet al punto limpio. No hay nada como cambiar el mueble del salón para darte cuenta la cantidad de mierdes que guardas","d":"2024-02-09","a":"jorjos"},{"t":"Yo con 15 años mismo padres dejaron de darme paga...ya ganaba yo mi dinero..les dije o aporto en casa y me dais paga o me gestiono.yo solo...así paso a los 23 me fui de casa 😎😎","d":"2025-11-17","a":"jorjos"},{"t":"Y además pillo cacho por la visita del paaaapa..que venga cada año..con lo que me llevo este año, me voy 1 semanita de vacaciones pagadas gracias al señor🙏🙏","d":"2026-05-26","a":"jorjos"},{"t":"Por cierto a lo mejor viene mi antigua compi Rebeca. Ahora es jefa de ventas de ediciones planeta... Julio prepara un anillo😅😅","d":"2024-12-09","a":"jorjos"},{"t":"Como justificas una comida o un viaje de negocios??..tengo que mandar factura de la venta, y porque en vez de ir al burguer me he ido al urrechu","d":"2022-01-21","a":"jorjos"},{"t":"El bicho se lo dejaré a una...madre mía cómo está esto!!!...ya os contaré lo de mis vecinos...voy a escribir un libro..🤣🤣","d":"2021-08-19","a":"jorjos"},{"t":"Yo soy Dios y el espíritu Santo...velo por todos vosotros para que no acabéis en el engaño😜😜","d":"2022-07-13","a":"jorjos"},{"t":"Y hoy tengo fiesta Oracle..julio espero ver a tu hno y decirle que buena persona eres🤣🤣","d":"2025-12-19","a":"jorjos"},{"t":"Alguno estaréis guardando los mensajes para luego ir a salsa rosa y forraros. Esto es igual que cuando estuve a punto de entrar en gran hermano 🤣🤣🤣","d":"2023-10-02","a":"jorjos"},{"t":"Me viene a buscar la chavala que vive conmigo y llevo 20 botijos y 4  Pelotazos... Me jode mi último campano y pillo el coche pata que me calzen... Depende como lo veas","d":"2022-01-31","a":"balda"},{"t":"me acaban de pagar de Carrefour un diferencial que les pedi con mi finiquito de Supersol y se hacían los locos.... Putos bastardos.. soltar los pavos perross¡¡¡¡","d":"2023-05-19","a":"balda"},{"t":"Por cierto ayer estuvimos en el de más abajo y es muy plan parejitas pero se crecen tres pueblos.. Tapas mierdas y para comer caro","d":"2023-12-16","a":"balda"},{"t":"pero vamos que barro barro tampoco..  en el tanque nos ponen mejillones, revolconas, paella etc.. que coño quieres que te pongan ?","d":"2024-01-25","a":"balda"},{"t":"Jefessss.. solo le ha faltado la frase esa de yo ahora mismo me muero y tu metes todos los dias … y ya no me coges... 🤣🤣🤣🤣","d":"2024-04-21","a":"balda"},{"t":"Me ha picado el tío Sam que donde empezábamos.. Que vienen vinagrazos de Jaén directos al bar 1","d":"2024-01-31","a":"balda"},{"t":"Mola reenviar basura de Instagram, tik tok etc.. Pero. Solo se pide que se lean por lo menos para saber si tienen coherencia joder","d":"2024-09-13","a":"balda"},{"t":"A un tío que le gusta Foo Fighters, Nirvana y Rosendo... ahora me viene con que le gusta Shakira. Venga coño, lo dices por llevar la contraria, que te conocemos","d":"2023-01-14","a":"javi"},{"t":"Ayer entrevistaron a Llorente en Onda Cero y me gustó bastante lo que dijo. Está un poco tarado pero el tío por lo menos no es un cabeza plana como muchos futbolistas","d":"2026-06-27","a":"javi"},{"t":"Chicos, disfrutad mucho del día de hoy y feliz año nuevo!! Sois unos putos jefes y es un verdadero orgullo pertenecer a este grupo","d":"2024-12-31","a":"javi"},{"t":"- Qué viene la elfa, que viene la elfa, que viene la elfa \n- ¡Joder con el puto disléxico! Me lo he tragado todo.","d":"2024-12-18","a":"javi"},{"t":"Joder, me acaba de venir una inspección del SEPE a una formación que estoy haciendo en Azuqueca","d":"2025-11-07","a":"javi"},{"t":"La uva bobal siempre han dicho que es una mierda. El otro día probé un vino con esa uva que flipé. Hay muchos factores","d":"2024-12-22","a":"javi"},{"t":"Hoy voy a comer a casa de los padres de un amigo de Marco, me dicen qué me apetece tomar y les digo que un vinito. Me dicen que ellos no beben vino pero que tienen uno que les regalaron el otro día, que si no me importa","d":"2025-04-13","a":"javi"},{"t":"- Mi hijo está dando clases de flamenco. \n- ¿Y qué tal le va? \n- Muy bien, ya se mete en los charcos y se mantiene con una pata","d":"2025-02-03","a":"javi"},{"t":"Ayer cuando vi a Salvi, Samu me miró mal. Porque me vio contigo Salvi, si no me calza una hostia","d":"2021-12-25","a":"javi"},{"t":"Ayer Nadal 4 set 39 juegos 4h 10 minutos más o menos\nHoy cilic rublev van por el 5 set 43 juegos 3h 20'","d":"2022-06-01","a":"david"},{"t":"Joder lo de desvelarte por la noche creía q solo me pasaba a mí por trabajar por las noches","d":"2026-06-06","a":"david"},{"t":"Con ese presupuesto y los años q han llevado para lanzarlo resulta q por unos cables sueltos se pierde.\n🤦‍♂️","d":"2020-11-17","a":"david"},{"t":"Sigo confirmando q no se ve\nHoy he visto una moto q tenía puesta la baliza e iluminaba más los warning","d":"2026-01-08","a":"david"},{"t":"Yo he venido de más abajo de Tomelloso y ni una gota por el camino\nEso sí el campo estaba con mucha agua. Debe haber llovido esta mañana","d":"2023-09-03","a":"david"},{"t":"La clave de todo está en el azar: evitar los cromos repetidos es, sencillamente, imposible. El matemático desmontó una de las fantasías más habituales entre coleccionistas: completar el álbum sin duplicados.\n\n\n😂😂😂😂","d":"2026-06-27","a":"cesar"},{"t":"A mí lo que menos me gusta de Carleto son los cambios.\nTienes a 16 o 17 tíos en forma,utiliza los cambios coño! Luego no vengas llorando que la temporada es larga y se van a cargar a los futbolistas","d":"2023-03-03","a":"cesar"},{"t":"Me he acordado en el reportaje de \"los otros\" de one club man, salía López y decía q en aquella época entrenaban con espinilleras de lo q repartían 😂😂😂","d":"2020-11-17","a":"cesar"},{"t":"Bombero torero e interpretó innumerables películas?\nJoder, más allás del 1,2,3 y las cintas y Tele5 no sabía que había hecho más cosas","d":"2024-01-03","a":"cesar"},{"t":"Pregunta semirecurrente:\nEs obligatorio pasar la revisión de la instalación del gas y la caldera cada 5 años.\nTenéis contratado el servicio de mantenimiento de la compañía de turno para que os lo haga?\nEn caso de que no, quién os hace esa revisión obligatoria?","d":"2024-01-18","a":"cesar"},{"t":"Menos mal que no cayó en la capital lo que se esperaba 🤦🏽‍♂️.\nViendo lo que hay por ahí, esto estaría parado más de una semana.\nMi curro las naves inundadas  no se puede trabajar no acceder a las oficinas","d":"2023-09-04","a":"cesar"},{"t":"Es como si me dices que el Athletic manda a tomar por culo a Íñigo Martínez porque el último año de contrato se está riendo del Athletic.\nAcaba mal Íñigo con el Athletic él ha decidido acabar así","d":"2023-02-23","a":"cesar"},{"t":"No le conozco más que de la entrevista de ayer.\nLa sensación que me dio es que es un tío majo y humilde.\nVamos,como Bale pero en canario","d":"2022-03-24","a":"cesar"},{"t":"Joder el marqués!\nEncima de han dejado la corona y ya se habrá preocupado tu madre de dejarte la sorpresa para q te toque","d":"2021-01-05","a":"cesar"},{"t":"Joder, leo que Will Smith le ha pegado una hostia a uno en los Oscar por una broma sobre su mujer al recoger las estatuillas","d":"2022-03-28","a":"cesar"},{"t":"Joder, yo si tuviera una pala limpiaba el portal, pero de dónde coño saco una pala?","d":"2021-01-09","a":"cesar"},{"t":"Habéis oído algo del chaval del Castilla que estaba en la convocatoria y no ha viajado al final?","d":"2023-12-21","a":"cesar"},{"t":"4 capitulos de Salvador y muy entretenida, pero estoy con Julito que estaba indignado porque no tiene nada que ver con la realidad. 😂😂\nNo como Acorralado o el señor de los anillos","d":"2026-02-23","a":"cesar"},{"t":"120 toques de balon de ellos 80 en el centro del campo sin profundidad, si sabes que se ban a encerrar potencia las bandas joder que es lo unico que abre las defensas","d":"2022-12-06","a":"porra"},{"t":"Se nota el estilo Farsa , menudas mierdas vende el puto Javi..Están perdiendo tiempo y apretando el culo, que no vengan diciendo que solo saben jugar al toqué..","d":"2023-06-11","a":"porra"},{"t":"Pues ayer Baraja también se lío un poco como Javi comparó al valencia con un Skoda y eso que son patrocinadores del Valencia 😂","d":"2024-05-17","a":"porra"},{"t":"Hay una imagen de Vinicius en carretera con el Chimy ,Vinicius con más de 50minutos en las piernas y el Chimy que acababa de salir y le saca más de dos metros en la carrera y controlando el balón...Esta muy en forma y es muy bueno pero como no cambie la tontería que tiene encima va a acabar mal..","d":"2023-05-07","a":"porra"},{"t":"Madre mía menuda rueda prensa de Xabi estaba hablando un cadáver.Y encima Pepito.. le va a dar la puntilla🤦‍♂️","d":"2025-12-09","a":"porra"},{"t":"Si el tío Floren le quítese 1 millóncejo cada ves que le expulsan por protestar otro gallo cantria","d":"2025-01-10","a":"porra"},{"t":"Lo que no entiendo como puede seguir jugando un tío con aires de desganado y mascando chicle que no defiende ni ataca bien","d":"2026-04-04","a":"porra"},{"t":"Joder las declaraciones de caragrifo quejandose de que el valencia no quiso jugar al futbol...que poca vergüenza tiene este tio","d":"2022-02-11","a":"porra"},{"t":"Que puto llorón es Javi... Como palme hoy que excusa pondra🤔 y si gana será gracias a que dijo que se pira🇪🇸","d":"2024-03-12","a":"porra"},{"t":"Hasta que no pasemos otros dos años de sequía no tomará cartas Floper y largará al puto Tonticius...","d":"2026-08-07","a":"porra"},{"t":"Joder, he visto un extracto de ayer del chiringuito en el que salia Carmen Colino... es increible el margen de mejora que sigue teniendo esta mujer","d":"2022-03-08","a":"josete"},{"t":"Con independencia de cuando jugueis al futbol hoy, el 95% del chat a estas horas lleva minimo  media hora despierto... Hace unos años llevaria media hora durmiendo 🤣🤣","d":"2026-04-25","a":"josete"},{"t":"Lo de siempre necesario, #Tranquilito. Feliz cumpleaños, RO. Disfruta del saco de reuniones con gente extranjera que tendras hoy... Y esta noche, un big mac para poner el broche!!","d":"2024-10-11","a":"josete"},{"t":"Bolindreeee, las pollerias del Carrefour y yo te deseamos un feliz cumpleaños!!! Espero que lo celebres con unos buenos contramuslos deshuesados","d":"2023-11-10","a":"josete"},{"t":"Joder, visto como esta terminando esto y como le estan ninguneando, si yo fuese Xavi, les sacaba hasta las visceras...","d":"2024-05-24","a":"josete"},{"t":"- Joder tío, tengo un grano en el culo que me tiene hecho polvo.\n- ¿Te lo reviento?\n- Bueno, pero ten cuidado con el grano.","d":"2022-10-07","a":"josete"},{"t":"Voy a comprar ayer unos contramuslos de pollo. El kilo 4,79... No esta nada mal... Le digo que me quite la piel y el hueso, y me dice que entonces el kilo es 7,89.... Pero pedazos de hdlgp!!!!","d":"2023-11-06","a":"josete"},{"t":"Ayer leia un articulo de un periodista de EEUU y decia que qué coño hacia Deck en la NBA... que no tiene nivel...","d":"2021-04-15","a":"josete"},{"t":"Joder, con que poco me ilusiono y con que menos poco aun me quitais la ilusion, putos","d":"2021-05-07","a":"josete"},{"t":"Ah por cierto lo q iba a decir es que cuando salió Lautaro pensé que ese tío era cenizo para argentina (a mi personalmente me gusta) y que todavía remontaba PB con 2-0 en contra y cuando vi el 2-2 dije “miaaauuu” \nBueno al final metió su penal incluso así que nada","d":"2022-12-09","a":"dani"},{"t":"Al tarao? No hablo apenas, nos cruzamos poco y tiene poca conversación.\nLa última le dejé una nota en la puerta, se había dejado el coche en el garaje con las luces puestas, como trabaja de noche, cuando le llamé al timbre a las 11 estaba como un koala sobando. A pájaro la batería","d":"2024-06-07","a":"dani"},{"t":"La tele de toda la vida no la pongo no se desde hace cuando y ayer puso sofi la sexta un momento por la tarde y 5 minutos q escuché mientras hacía unas cosas me dio un bajón de la hostia así q la apagué","d":"2021-01-15","a":"dani"},{"t":"Que cosa más curiosa  me ha pasado, estamos en el campello de vacaciones y me dice Vega esta tarde q el Hermano de una amiga que se ha echado ha hablado con Vinicius hoy por teléfono, claro está que no la he hecho ni puto caso. Pues resulta que estoy viendo twitter y veo este vídeo","d":"2023-08-05","a":"dani"},{"t":"Jodeer q guapo, se han picado Ibra y Gorilaku pero en plan q si les dejan caen hostias q no les separa ni Tyson","d":"2021-01-26","a":"dani"},{"t":"Joder es q el Valades ese se tenia que pegar unas fiestas que ni el lobo de Wall Street porque ya me dirás en qué te fundes esa pasta","d":"2023-04-25","a":"dani"},{"t":"No se, pero cuando busqué Iberia en X era con esa intención y me encontré a Figo poniéndoles a parir, pero porque había reservado en business y le metieron con la plebe Jajaj","d":"2025-04-12","a":"dani"},{"t":"La pillé, tengo las orejas muy raras, siempre se me cae el auricular izquierdo de cualquier casco q me ponga y el otro día en la primera llamada se me perdió por debajo del asiento, la gracia, 10-15’ buscándolo","d":"2020-11-20","a":"dani"},{"t":"Joder he leído que los colombianos se lanzaron asientos entre ellos porque eran aficionados de millonarios y de America de Cali e imagino que no se llevarán muy bien","d":"2023-06-17","a":"dani"},{"t":"Me la sudaba un poco quien subiera, iba al 51% con el levante porque mi hija me habla de un tal postigo que es tío de uno de su clase.\nYa le digo, conoces más futbolistas del levante que yo","d":"2023-06-17","a":"dani"},{"t":"Jajajaj es q es de coña, es como si vas a tomarte una cerveza helada en jarra de cristal con un buen solomillo y te traes una birra en vaso de plástico y una hamburguesa de carne de rata","d":"2020-11-18","a":"dani"},{"t":"Chavales, una duda.\nQuiero ir esta tarde al cine con Sofia y las  niñas, sabéis más o menos las entradas más palomitas y refrescos por cuanto me puede salir?","d":"2024-11-18","a":"dani"},{"t":"Yo tambien tengo mala hostia porque lo vi cerca, pero la planificacion deportiva te mata ayer mirando sl banquillo y viendo que tus cambios ofensivos son matutano y gonzalo","d":"2026-04-16","a":"dperez"},{"t":"Ayer salia un iluminado cule diciendo que quien iba a hacer mejor año si tchouameni o el kessie ese que han fichado ellos y le contesto uno que kessie de momento no pueden ni inscribirle","d":"2022-06-08","a":"dperez"},{"t":"Jajajajajaja que culpa tiene el chaval de que al final no haya venido, el me dijo lo que se comentaba alli y con lo que contaban en el cuerpo tecnico","d":"2026-08-07","a":"dperez"},{"t":"Es psg community, salio ayer, los mismos que el año pasado fueron los primeros en decir que renovaba y en soltar lo de luis enrique este año","d":"2023-07-07","a":"dperez"},{"t":"para que digamos que floren no esta chocho, te pagan pasta por el hiwok de ciudad real y la rechazas, que laterales izquierdos no tenemos ninguno😂😂😂😂😂","d":"2026-02-03","a":"dperez"},{"t":"Balda, que ha pasado con laporte? Iba mal el fax ayer en lezama y teneis que devolverlo a arabia? Espero que tengais ticket regalo","d":"2025-09-02","a":"dperez"},{"t":"Jajajajajaja tu balda al mercado del bilbao que es muy amplio, igual este año alguno de la real b o del alaves podeis rascar","d":"2022-06-07","a":"dperez"},{"t":"Yo solo me estoy imaginando los gritos de rober cuando se resbalo mendy y era incapaz de levantarse😂😂😂😂","d":"2025-03-13","a":"dperez"},{"t":"Yo si pudiera votar, 25 de enero a parte de mi cumple se que estoy 100 x 100 sin problema el 1 de febrero hay torneos asique si fuera 25 de enero me iria genial para no perdermela","d":"2024-11-15","a":"dperez"},{"t":"Eso es a parte de la cesta! Otro regalo que nos han dado, pero ayer era un mercadillo de intercambio de tallas porque lo mismo venia una s que una xl","d":"2024-12-18","a":"dperez"},{"t":"A ver si te crees que alaba, con 32 castañas, 13 meses sin jugar y estando en la elite de los 17 va a volver a estar bien😂😂😂😂bastante que puede hacer vida normal","d":"2025-01-17","a":"dperez"},{"t":"Esque con 3-0 ayer que pintaba en el campo, que me lo expliquen!!! Que ha jugado todo con 5 dias de pretemporada","d":"2024-09-25","a":"dperez"},{"t":"Por que te metes con el chaval que no sabe botar el balon y se lo pasa por los huevos? Que culpa tiene el niño de ser descordinado?","d":"2025-09-03","a":"dperez"},{"t":"Le dice Juancar: sin gluten tenemos tercios,,, y dice ella eso trae más que un botellín? Y Juancar: Claro, y va y suelta ella Mejor con gluten que los tercios me van a sentar peor al final 🤣","d":"2026-01-25","a":"rober"},{"t":"Es lo que hemos hablado,,,\nVeo más ganable a los argentinos,,,,\nPero me jodería muuuucho más perder co ellos,,, \nPero claro GANARLES a esosss","d":"2026-07-15","a":"rober"},{"t":"🥃 *Hoy la primera copa de los cumples está patrocinada por la palanca de la veintina para cualquier Bultalla. Acercaos a mí, yo os proveeré* 🥃","d":"2023-03-11","a":"rober"},{"t":"Joder lo del Bernabeú ya decía yo que iba lento, no sabía que acababan para octubre de 2022 😳","d":"2021-02-17","a":"rober"},{"t":"Me ha dicho mi prima antes que cuando hagamos la \"ruta del botellín\" en enero que la avisemos 🤦🏻‍♂️","d":"2021-09-22","a":"rober"},{"t":"Lo que acabo de leer es que se fueron directos de Estambul a Ibiza a pasar el domingo... que le den por culo a los aficionados en Manchester 😂","d":"2023-06-13","a":"rober"},{"t":"Es que mi padre tenía prepago y le cobraban por esas mierdas, le tuvimos que hacer contrato","d":"2023-08-27","a":"rober"},{"t":"Carlitos muy bien hoy, a partir de ahora le voy a llamar padrastro, como la pega el chaval","d":"2022-06-29","a":"rober"},{"t":"Ayer volamos a Edimburgo, porque no había vuelo directo aquí. Y esta mañana hora y media de tren hasta aquí","d":"2026-10-02","a":"rober"},{"t":"Me acaba de decir uno de mi curro que vive por Sanchinarro, que ayer oía a Metallica desde su casa, y vive a 3km del Madcool...","d":"2022-07-07","a":"rober"},{"t":"En el chat de la generación del 27 estaréis hablando del cambio climático y de los bitcoins sin embargo 🤣","d":"2022-06-15","a":"rober"},{"t":"Y me reafirmo, Hamilton con la mierda de coche q tiene está haciendo podiums, el Cayetano con un pepinazo a duras penas hace alguno y si no le regalan la pole estará siempre comiendo humo","d":"2022-08-28","a":"salvi"},{"t":"Por ejemplo el otro día en el Fiat de Elena salía el error de sonda lambda, y el coche tiene dos sondas lambdas con sus conectores q también puede ser el origen del fallo, lo normal en un taller es q te cambian la sonda lambda q suela ser la q se jode y si no pues a cambiarte la otra","d":"2020-12-14","a":"salvi"},{"t":"El Deivid q en aquellas estaba en la academia preguntó a su profe y le dijo q no hiciera ni puto caso q al no estar empadronado en Getafe no me pasaría nada!!! Supongo q no haría mucho caso a ese profesor a la hora del examen de munilla","d":"2024-10-08","a":"salvi"},{"t":"Si yo voy porque hoy y ayer libraron una de las chicas y para q no estén solas, Elena todo el calzado q tiene es con tacón y es inviable q vaya","d":"2021-01-12","a":"salvi"},{"t":"Pues no está mal la turra para no tener ni coche. Es como si la vecina de mi madre q tiene 90 años se indigna por qué tiene q comprar una baliza y no ha tenido ni carnet en su vida","d":"2025-11-22","a":"salvi"},{"t":"Para los Calpe lovers, alguna recomendación de zona o algo?? Estoy viendo q para la 1ª quincena de julio mi Cadiz natal está inviable","d":"2021-06-06","a":"salvi"},{"t":"Ayer fue por las condiciones metereologicas y porque quedaron fuera dos de los q tienen mejor coche q él. Alonso es muy buen piloto pero no tiene coche para luchar por victorias","d":"2022-06-19","a":"salvi"},{"t":"Es decir aunque os pegue una hostia un camión de basura y sea culpa suya, como tengas el coche a terceros date por jodido","d":"2022-11-06","a":"salvi"},{"t":"A mi hace poco me llamó el cartero por la mañana para decirme q si iba a estar en casa entre las 13 y las 14 porque si no iba a estar directamente no lo metía en la moto porque ya llevaba el cofre hasta arriba","d":"2021-01-05","a":"salvi"},{"t":"La vida es una mentira, te engañan hasta tus padres desde q eres pequeño diciéndote lo del coco y los reyes y esas cosas, como no te van a intentar engañar todo el mundo??","d":"2022-02-10","a":"salvi"},{"t":"Como me joden los listillos estos q vienen al taller ya diciéndome lo q le pasa al coche y q es lo q hay q hacer. Te dan ganas de decirle q para q viene, q si lo sabe q lo cambie él con los cuernos","d":"2022-02-10","a":"salvi"},{"t":"Pero vamos a ver, si tú te quedas tirado en una carretera comarcal de un pueblo de Soria y tienes q llamar a la grúa, digo yo q será mejor q actives la baliza y te localice","d":"2025-11-22","a":"salvi"},{"t":"Ya se te ha olvidado como son los niños por lo q veo, Samu a los 10 minutos del juguete ya está dando por culo, me da igual Reyes a papá Noel","d":"2020-12-31","a":"salvi"},{"t":"Eso es lo que opino yo. Si en un semáforo te la lía un calvo y le dices “calvo de mierda” ya quiere decir que odias a los calvos ? \nNo, odias a ese calvo que te la ha liado en el semáforo y le insultas como crees que le va a joder más","d":"2023-05-23","a":"julito"},{"t":"Tiene dos fincas una en burgo hondo y otra en Navaluenga. \nAhora el chaval está en la carnicería currando por si os dais un paseo por el pueblo y queréis un chuleton. Y esta tarde libra por si os apetece que os da una vuelta y veis las vacas. A los niños le gustará","d":"2022-03-12","a":"julito"},{"t":"Por eso digo. Que el problema es la cantidad utilizada de los dos barriles. \nYa os digo que se vaciaron 3 veces el cubo. Y el último que quedó estaba lleno. Poniendo 5 litros por cubo tirado pueden ser de 15 a 20 litros de cerveza. \nDe 80 litros 20 es el 25%","d":"2023-04-21","a":"julito"},{"t":"Casi me meo. Mi padre está desesperado porque no ha podido salir a por el periódico. Y le digo que mañana posiblemente tampoco pueda salir y me dice \n#yaveremos","d":"2021-01-09","a":"julito"},{"t":"Así somos. \nO para una receta médica en vez de solicitar cita telefónica para q la validen hacen como mis padres que quieren ir a sentarse con la doctora y contarle su vida.","d":"2022-08-12","a":"julito"},{"t":"Jajjjaj. Parece que no le conoces. Si llegas a decir que te han comentado q esas cervezas son una auténtica mierda Ojeda hubiera dicho que son exquisitas.","d":"2020-12-10","a":"julito"},{"t":"🤷🏻‍♂️ algo me dijo Julio, pero quien lo celebra? Porque yo me junte con ese el año pasado y este año estamos el Chino y yo descolgados, o lo hacemos con  unas neveras y unas tortillas en el Cerro 🤷🏻‍♂️","d":"2024-03-04","a":"filete"},{"t":"Yo te hablo mas de creer mas que de saber, cuando vea alli 20 pinches imagino q dira q paga la 2 primeras rondas, cuando pidamos la cuenta las descontara y punto, aunq la otra vez pago hasta la comida, pero creo q esta vez no hay tanto feeling….y eso q no tenga el Concu algun evento.","d":"2023-06-21","a":"filete"},{"t":"Chavales, ya en casa de mi cuñada, en Conde d Casal 😅 historico no, lo siguiente. Muchas gracias x las preocupaciones privadas y grupales, se agradece.","d":"2021-01-09","a":"filete"},{"t":"😂😂😂😂 confirmo lo q dije ayer, ( este aporta y mucho, era el unico que leia, se me acumulaban msj en otros 20, son malisimos) este tiene de todo, dicho lo cual vuelvo a la pala 🤦🏻‍♂️🤦🏻‍♂️","d":"2021-01-11","a":"filete"},{"t":"Cuidado a la juega maestra de vinagres de manual, cuando estaba el video acabando, nos escapamos unos cuantos hacia la barra xa asegurar pelotazo rapido….y ya habia 4 de los nuestros en la barra 😂😂😂","d":"2021-08-08","a":"filete"},{"t":"Mitad dice 🤦🏻‍♂️sali tarde de currar, con el disgusto de Nadal me fume los 300 msj, me he enterado esta mañana con el comentario de Salvi 🤷🏻‍♂️","d":"2021-06-12","a":"filete"},{"t":"Impoosibleeee, lo q dice el Deivid, no se ni a q hora saldre, como objetivo volver mañana(pq curraria x la tarde)🤞🤞🤞, Alexandra encantada y todo el dia con la pala 🤦🏻‍♂️🤦🏻‍♂️🤦🏻‍♂️","d":"2021-01-09","a":"filete"},{"t":"😂😂😂🤦🏻‍♂️ me lo contaron, muy torpes los picoletos q dejan la A-6 en un carril a 300 metros del desvio de la m-30 en prohibido, entraron mas de 20 llamadas al 112 en 5 minutos","d":"2022-06-14","a":"filete"},{"t":"Y nos hemos saltado el dia del egoista, lo dijo Julio ayer…y como buen egoista lo conto cuando ha pasado 🤦🏻‍♂️🤦🏻‍♂️😂😂😂","d":"2022-11-20","a":"filete"},{"t":"Organizador!!!!! Se puede tomar cervezas alli antes? Hay bar enfrente? Q tal se aparca? Que dejadez 🤦🏻‍♂️🤦🏻‍♂️🤦🏻‍♂️😂😂😂","d":"2022-12-10","a":"filete"},{"t":"Despues de una noche exquisita, hay q pensar en la siguiente, no el lunes contra Albania como queria Kayto 🤦🏻‍♂️🤦🏻‍♂️🤦🏻‍♂️, octavos el domingo sera dificil, pero si pasamos en Cuartos contra 🇩🇪 se podria hacer otra 💪🏽💪🏽","d":"2024-06-21","a":"filete"},{"t":"Eso seria idilico, pero no vi espabilados a los camareros (no tenian hielo un sabado a las  4 de la tarde) y tener q esperar cada aperitivo x cada vez q pida alguien seria un pequeño caos porque en el bar habia mas gente, incluso a la hora de la comida estaba petado","d":"2023-04-19","a":"filete"},{"t":"Veo al chat de bajón después del bodrio de ayer, estamos igual q en el 2010 q no jugamos a nada, Busquets era malo y lento, como ayer Rodri, pero ya lo dice el refrán, siempre q llueve escampa, nos vemos el domingo 💪🏾💪🏾💪🏾🇪🇸🇪🇸🇪🇸","d":"2026-06-16","a":"filete"},{"t":"Pero si me das la razón periolisto 🤦🏻‍♂️🤦🏻‍♂️🤦🏻‍♂️ se habla de todo, otra cosa es q se opine o importe el nuflo las cosas, pero se RESPETA todo lo q se dice","d":"2023-06-20","a":"filete"},{"t":"😂😂😂😂 vosotros bromear pero tiene lo de los msj temporales, le felicite ayer y ya no estan esos msj 🤦🏻‍♂️🤦🏻‍♂️","d":"2023-12-01","a":"filete"},{"t":"A Quevedo lo estuve oyendo el otro día y es una mierda más, y el Bizarrap ese ha encontrado el preset adecuado en el Pro Tools y a todos los artistas con los que graba los hace famosos.","d":"2022-08-26","a":"gus"},{"t":"bueno ayer decían una cosa que pone los pelos de punta por el futuro que presenta: por ejemplo, puedes pedirle al software que te haga una redacción de la Revolución industrial, de 1800 palabras y utilizando el lenguaje de un chico de 14 años","d":"2023-02-07","a":"gus"},{"t":"El día del loro del coche de Óscar en Moncloa , abre, nos sentamos y me dice: Gus saca el loro, y yo veo la guantera abierta y papeles por el suelo y digo: aquí no hay loro, donde lo tienes? Y él cómo? .... Yo tarde tiempo en dae cuenta del choleo","d":"2022-02-16","a":"gus"},{"t":"🤣🤣🤣🤣🤣🤣 me imagino a sus nietos sacándola al balcón con las gafas de sol puestas, y moviéndole el brazo como si saludara","d":"2022-09-08","a":"gus"},{"t":"El otro día estuve en Segovia informándome para volverme a la península, y estoy intentando convencer a Leti para que vaya haciendo lo mismo y se lleve a Marco.","d":"2021-10-09","a":"gus"},{"t":"Yo lo vi en Chamartín en un bar porque tocaba Manowar en la sala Macumba, y mientras abrían puertas me eché una birra viéndolo.,","d":"2021-05-22","a":"gus"},{"t":"Cómo me jode que mi hijo se ponga a estudiar dibujo técnico, y le digo cómo hacer algo, me dice que no le hace falta mi ayuda, y se pone a ver en youtube cómo se hace.","d":"2022-01-17","a":"gus"},{"t":"Yo la acabé el otro día y me gustó. Lo mejor de la serie, los actores. No hay uno malo. Sale uno haciendo de Doriga, por cierto.","d":"2020-12-27","a":"gus"},{"t":"La padelina es más pegada a navidades, pero  otra - ina cualquiera, de esas que os sacáis de la manga.","d":"2020-12-07","a":"gus"},{"t":"Esta gente organiza una travesía en el Atlántico. Tengo un colega aquí que  está todos los años con eso","d":"2020-12-20","a":"gus"},{"t":"En mi experiencia, he notado qeu cuando me he quedado en casa, los jefes se ponen nerviosos pensando que vas a estar sin hacer nada. A diferencia de cuando voy a la oficina, en la que ya solo con ir se piensan qeu estoy haciendo algo (y que no estoy todo el día leyendo este grupo)","d":"2021-12-22","a":"gusrojo"},{"t":"A mi los de Delaire 2000 les llamé para pedir presupuesto para un split en el pasillo de casa. Vino un tío y al día siguiente me dijeron que no me daban presupuesto para eso. Que eso no lo hacían","d":"2023-04-20","a":"gusrojo"},{"t":"Yo el unico pero que pongo a esos apartamentos es que cuando salen los chavales de la disco que hay suelen salir cantando y por las noches a veces me despiertan","d":"2021-06-06","a":"gusrojo"},{"t":"Joder. Ya es curiosidad. Por que hay CCAA donde hay mas peajes que en otras? Habra mas guiris?","d":"2022-04-29","a":"gusrojo"},{"t":"Un día como hoy pero hace 25 años empecé de novio con la que actualmente es mi mujer y madre de mis hijos.\n\nQuiero dar las gracias a todos y especialmente a Josete porque sé que a él le va a hacer mucha ilusión leerme.","d":"2025-09-10","a":"gusrojo"},{"t":"No fue así. En uno de los canticos y saltos se te cayeron. Me las guardé para gastarte una broma y se me olvidó dartelas. Aparecieron al día siguiente en mi casa","d":"2024-02-09","a":"gusrojo"},{"t":"😂. Que si tiene caldera el vecino. Me refiero que aunque tu no tengas, si revienta la del vecino estarias jodio igual","d":"2021-01-20","a":"gusrojo"},{"t":"😂😂😂 me referia a que yo no puedo estar viendo dos series a la vez. Ya se que es imposible ver los capitulos","d":"2020-12-20","a":"gusrojo"},{"t":"Pues es lo que menos me importa. Ayer un vecino de la urba me dijo que queria que ganase Argentina para que no le den el balon de oro a Lamine","d":"2026-07-16","a":"gusrojo"},{"t":"Esto es un soplo: estoy en un bar en Santander con el niño, al lado un viejo al que le acerco la cerveza para que no se levante … me dice “le gusta el fútbol?”… si… mi nieto juega en el Racing… pues muy bien (pensaba que era un crío)… es Salinas, el lateral, no sé si le conoce el niño….","d":"2026-05-29","a":"karpanta"},{"t":"Josete, como experto en gestión de recursos…. Hay un chaval en mi curro que llevará tres meses, no sé ni qué contrato tendrá, genZ empanao…\nPues hoy ha venido con el pelo entero de rosa fosforito.","d":"2026-01-16","a":"karpanta"},{"t":"Te acuerdas de aquel que jugaba con nosotros que cuando se encaraba con uno le decía: “léete un libro!” 😂😂😂 Guillermo, no?","d":"2021-02-04","a":"karpanta"},{"t":"Joder, me acabo de enterar que al MANU le patrocina Team Viewer. Pero alguien paga por eso??","d":"2022-03-15","a":"karpanta"},{"t":"Vuelve el Grinch de los Reyes… que opináis del típico “cómo lo que querías no estaba rebajado, te han traído este otro parecido,¿pero a qué te gusta igual?","d":"2023-01-06","a":"karpanta"},{"t":"Y mi hija preocupada por qué asignaturas elige en bachillerato para sacar la nota ponderada…\nLo que la salga del coño, que va a dar igual","d":"2022-07-27","a":"karpanta"},{"t":"Si os volvéis a casar, lo recomiendo. Quedas de buen tío y solidario con los invitados y el estado te subvencionado por otro lado el detalle de boda 😈","d":"2024-11-08","a":"karpanta"},{"t":"Joder, me ha pasado ha mí en medio de una reunión también… no habréis lanzado una bonita actualización por detrás ???","d":"2023-02-14","a":"karpanta"},{"t":"Que hiciste el fin de semana??\nPues mi padre me llevo de excursión al campo y comimos un picnic y luego jugamos a una gyncana con otros padres….","d":"2022-10-28","a":"karpanta"},{"t":"No os parece que el escenario ahí puesto está fatal para las masas? Los laterales no ven… por lo menos si estuviera perpendicular a castellana se puede hacer fila hasta el fondo todo lo que llegue","d":"2026-07-20","a":"karpanta"},{"t":"Acabo de tener reunión con argentinos, les he tenido que decir que esperamos vernos el domingo, porque seguro que ganan a 🏴󠁧󠁢󠁥󠁮󠁧󠁿 por lo buenos que son. Ojalá te oiga Dios, decían.\nMe paso el día mintiendo en el curro","d":"2026-07-15","a":"karpanta"},{"t":"Otra vez los putos ingleses:\n\nLa excusa que más se ha repetido a ese respecto es que 45 a la hora de pronunciarlo se hacía algo más costoso y largo que 40. Por lo que en Inglaterra se pasó del 'Forty five' al simple 'Forty' que en la actualidad cantan en todos los juegos los jueces de silla.","d":"2021-06-12","a":"karpanta"},{"t":"Me llama a las 21:00 q volvía del trabajo, q está en reserva y ha parado en el polígono de villaverde, q si puedo acercarme a dejarle pasta a la gasolinera q la cartera se la ha dejao en casa...","d":"2024-11-05","a":"juli"},{"t":"🚨🚨🚨🚨 comida en la manche el sábado de semana santa. Ayer hablamos de ir a zampar un arroz o lo q sea, id añadiendo los q queráis venir. El lunes reservo: \n-Julio\n-DP\n-Juli","d":"2021-03-20","a":"juli"},{"t":"Puto salvi, echo de menos esos sábados q salías del periódico y nos ponía unas mirindas el tío kirk","d":"2025-11-01","a":"juli"},{"t":"Leí ayer una piba q se dejó pastizal pal concierto de coldplay en Barcelona y le tocó mesa electoral...","d":"2023-05-29","a":"juli"},{"t":"Yo creo q lo lógico es q, quien venga tarde, beba cosas diferentes a cervezas (excepto balda), q pidan y paguen lo suyo","d":"2024-01-26","a":"juli"},{"t":"Señores, feliz día del amor y la amistad!!! Hoy como excepción por S.Valentin el viejo buscavidas sustituye a Doriga 🤣🤣","d":"2025-02-14","a":"peter"},{"t":"De todas formas parece que Valdebebas se va pagando con los traspasos/cesiones de los chavales. A tito Floren le salen las cuentas en ese sentido","d":"2023-12-14","a":"peter"},{"t":"En realidad me estoy conectando a ratos así que no sabía cuándo había hecho el break la rata 🤣","d":"2025-01-21","a":"peter"},{"t":"No estar atado a un horario y a un jefe ayuda mucho a pasar el día a día, es cierto. Lo malo es que nunca puedes desconectar del todo (salvo cuando me envinagro, claro..) 🤣🤣","d":"2022-06-02","a":"peter"},{"t":"Y no por los 115 pavos que me costaría, jajaja, sino porque estaré en el pueblo ese día. Lo veré con los Ortre y unas cervezas, no es mal plan ni mucho menos... 🙂","d":"2025-03-28","a":"peter"},{"t":"Si fuera por mí me quedaba y no iba a Estepona, pero igual el lunes tenía que pediros una habitación a alguno para vivir 🤣","d":"2023-09-28","a":"peter"},{"t":"Gracias chavales, nací un sábado como hoy a las 14h así que pinta hoy una buena riada de 🍺 a esa hora para celebrarlo 😜😜😜😜😜","d":"2026-04-25","a":"peter"},{"t":"Rubén Cano vaya pinta de quinqui, q mal teníamos q estar de 9's en aquella época para q fuera titular un oriundo paquete 🤣🤣","d":"2026-06-23","a":"peter"},{"t":"Q hdp encima saca faltas y corners y lleva un liderato q no es normal, señalando a todos los compañeros 🤣","d":"2021-05-19","a":"peter"},{"t":"Para mí como si fuera el que barría, mucho mejor el monitor que era clavado al tío Ruud","d":"2022-06-25","a":"peter"},{"t":"El momentazo baile sonando \"Born to be alive\" muy top, a la altura de los bailes de John Travolta 🤣🤣","d":"2026-03-27","a":"peter"},{"t":"Jajajaja, tal cual. Les hacía la misma ilusión que ir a repartir juguetes en Navidad a San Rafael","d":"2024-05-24","a":"peter"},{"t":"Jajajaja, bueno casi vale para chica. La del registro me preguntó varias veces si era niño o niña","d":"2021-02-01","a":"peter"},{"t":"A mí me pillan castaña con el coche, y me ponen a limpiar calles. A otros hacen algo muy parecido y....","d":"2021-01-17","a":"jocky"},{"t":"Hace un par de días paró el coche una tía en medio de un cruce y se puso a mensajear con el móvil","d":"2022-08-12","a":"jocky"},{"t":"Si hay alguno que pueda pasar un enlace para ver los coches esta tarde, que no se corte","d":"2021-03-27","a":"jocky"},{"t":"Llegando a Punta en Solanas en la gasolinera casi me choca una camioneta Honda y cuando baja el vidrio era Forlán🙄… como putearlo??😳","d":"2025-12-27","a":"alain"},{"t":"Golazo de Suárez!!!\nJajajja! Como la gozo!\nQ terrajas son los del Farça.... estaba acabado y es el mejor arranque de su carrera!!!\nLo regalaron y q un rival directo!","d":"2021-01-31","a":"alain"},{"t":"Pufff!\nAcabamos de entrar en casa… la peor tormenta de lluvia y granizo que me tocó enfrentar en la carretera… 20 minutos abajo de un puente y todos parados en la autopista, no se veía nada!!! Un horror, pero llegamos bien…👍🏼","d":"2021-09-01","a":"alain"},{"t":"Bueno, ya terminé el desayuno, arrancamos con cerveza… pregunté si había cerveza en el estadio, me dijeron que lo que no tienen claro es que haya refrescos o Coca-Cola, pero que cerveza seguro ja ja ja ja qué lindo es Brasil!!!","d":"2024-10-23","a":"alain"},{"t":"Feliz Navidad colonizadores queridos!!! se les echa mucho de menos, les mando un abrazo fuerte!!!","d":"2023-12-22","a":"alain"},{"t":"Renovación y plantelazo solo quedan muslera y godin (el pelado no cuenta porq entro por la ventana jaja) y creo hay verdaderos cracks y los que quedaron afuera todavia","d":"2021-09-01","a":"alain"},{"t":"Suarez entre los pichichi... vidal le hizo uno a la juventus... que boludo soy dios!!🤣🤣","d":"2021-01-18","a":"alain"},{"t":"Bélgica es de lo más accesible creo… y espero que hoy Argentina se vuelva a casa, para que no tengo cuatro ⭐️ y porque no los aguanta nadie…🙄","d":"2026-07-07","a":"alain"},{"t":"En FA Cup hay un Sunderland  - Newcastle,  7 años desde que bajaron","d":"2023-12-09","a":"julio"},{"t":"Muchas gracias a todos, otro GS aplazado . Sois unos jefes 🍺🍺","d":"2020-11-30","a":"julio"},{"t":"A ver si esta noche hay tongo en el Irlanda - Escocia de rugby y dejan fuera a Sudáfrica","d":"2023-10-07","a":"julio"},{"t":"El sábado,  empezamos en el antiguo Lechón, a las 12:30. Decírselo, al que queráis y llevarse 35-40 pavos en efectivo.  \nBuenos días!!","d":"2025-09-30","a":"julio"},{"t":"Va a sacar Nike camisetas NFL del Atleti, PSG y Chelsea","d":"2025-05-30","a":"julio"},{"t":"Al revés, nos dijo Cote que por favor no terminaramos alli","d":"2023-01-27","a":"julio"},{"t":"Perdimos aposta con el Granada para jugar con  el Tau","d":"2023-05-27","a":"julio"},{"t":"Suelo ver a los Mets, que empiezan sobre la 01 normalmente","d":"2022-07-22","a":"julio"},{"t":"Viene el dueño que no nos lo cobra y que nos invita a eso","d":"2024-09-15","a":"julio"},{"t":"Único fin de semana que coinciden las 4 grandes ligas","d":"2023-10-28","a":"julio"},{"t":"Chicos voy a intentar cerrar lo del barril para el 2 de Septiembre, idme diciendo quienes podeis, porfa","d":"2023-07-27","a":"antonio"},{"t":"Chicos ya he cerrado \"Donde la Lola\" lo del barril para el 2 de Sept","d":"2023-08-04","a":"antonio"},{"t":"Y me comprometí con Oscar que para celebrarlo me pagaría un barril a los Bultallas","d":"2023-07-20","a":"antonio"},{"t":"Me han pasao esto y me ha parecido chulo para los crios. Pones las 4 cosas que pide y te genera una especie de video personalizado de los Reyes Magos. Por si os hace para vuestras criaturas","d":"2023-01-05","a":"antonio"},{"t":"Vendré los findes que no tenga guardias y mierdas de esas","d":"2023-07-20","a":"antonio"},{"t":"Muy bonito la verdad, vimos varias cosas, entre ellas algunos pueblos del Batzan, Zugarramurdi, etc","d":"2024-06-04","a":"antonio"},{"t":"👍🏻👍🏻 perfect veniros a mi barrio que mola 🤣 y hacemos la proxima veintina por aqui","d":"2022-08-18","a":"antonio"},{"t":"Toy desayunando joe, que llevo desde ayer a medido dia sin comer na","d":"2021-09-20","a":"antonio"},{"t":"Pa lo del barril necesitaré vuestra ayuda xk ni zorra de donde es mejor ni peor","d":"2023-07-20","a":"antonio"},{"t":"Nos vamos a acercar ahora un ratillo a tomar algo, os escribo cuando salgamos pa ver donde estais","d":"2023-12-31","a":"antonio"},{"t":"Es lo k tenemos los viejos y los parados que nos encantan las obras 🤣🤣","d":"2022-08-18","a":"antonio"},{"t":"Claro me molaría entrar en ciber delitos de la poli pero pa eso hay k ser Poli primero","d":"2023-07-20","a":"antonio"},{"t":"Yo igual, el 31 viajo. Se las dejo a alguien. Feliz Navidad 🎄 jefazos!!!!","d":"2024-12-24","a":"huesa"},{"t":"Muchas gracias jefazos, ese barril nos está esperando el 23","d":"2026-04-26","a":"huesa"},{"t":"Gracias por abrirlo en una heladería que me ha mirado hasta el gato","d":"2024-10-30","a":"huesa"},{"t":"Me voy a tener que poner a Federico por las mañanas 😂","d":"2026-08-15","a":"huesa"},{"t":"Pasadlo bien putos. No he podido ir pero si puedo también lo celebro en abril","d":"2022-03-05","a":"huesa"},{"t":"Los días que me tienen que pagar los tickets restaurante","d":"2022-08-31","a":"huesa"},{"t":"Intenta dar de baja el imei para que se joda el que lo tenga","d":"2024-02-09","a":"huesa"},{"t":"Y el cubo 🪣 para que se suba la cabra que lo vayan poniendo los bares","d":"2025-02-19","a":"huesa"},{"t":"Vente con Samu que tengo una camiseta del Athletic","d":"2024-05-03","a":"huesa"}],"groups":[["gus","gusrojo"],["javi","karpanta"],["juli","julito","julio"],["antonio","julito"]]}</script>
+<script>
+(() => {
+  const D = JSON.parse(document.getElementById('data').textContent);
+  const ROUNDS = 10, OPTIONS = 4, MAX_PER_AUTHOR = 2;
+  const M = Object.fromEntries(D.members.map(m => [m.id, m]));
+  const $ = id => document.getElementById(id);
+  const rnd = n => Math.floor(Math.random() * n);
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const groupOf = id => D.groups.findIndex(g => g.includes(id));
+
+  /* ---- colores estables por miembro ---- */
+  const hue = id => { let h = 0; for (const c of id) h = (h * 31 + c.charCodeAt(0)) % 360; return h; };
+
+  /* ---- avatar: foto img/<id>.jpg|png|webp si existe; si no, emoji ---- */
+  function avatar(id, small) {
+    const m = M[id], el = document.createElement('span');
+    el.className = 'av' + (small ? ' sm' : '');
+    el.style.setProperty('--c', `hsl(${hue(id)} 38% 28%)`);
+    el.textContent = m.e;
+    const exts = ['jpg', 'png', 'webp', 'jpeg'];
+    (function tryNext(i) {
+      if (i >= exts.length) return;
+      const img = new Image();
+      img.alt = '';
+      img.onload = () => { el.textContent = ''; el.appendChild(img); };
+      img.onerror = () => tryNext(i + 1);
+      img.src = `img/${id}.${exts[i]}`;
+    })(0);
+    return el;
+  }
+
+  /* ---- portada opcional img/portada.jpg ---- */
+  (function cover() {
+    const exts = ['jpg', 'png', 'webp', 'jpeg'];
+    (function tryNext(i) {
+      if (i >= exts.length) return;
+      const img = $('cover');
+      const probe = new Image();
+      probe.onload = () => { img.src = probe.src; img.classList.add('ok'); $('logo').style.display = 'none'; };
+      probe.onerror = () => tryNext(i + 1);
+      probe.src = `img/portada.${exts[i]}`;
+    })(0);
+  })();
+
+  /* ---- ¿qué miembros tienen foto? (img/<id>.jpg|png|webp|jpeg) ---- */
+  const PHOTO = {};   // id -> url
+  function probePhotos() {
+    const exts = ['jpg', 'png', 'webp', 'jpeg'];
+    return Promise.all(D.members.map(m => new Promise(res => {
+      (function tryNext(i) {
+        if (i >= exts.length) return res();
+        const im = new Image();
+        im.onload = () => { PHOTO[m.id] = im.src; res(); };
+        im.onerror = () => tryNext(i + 1);
+        im.src = `img/${m.id}.${exts[i]}`;
+      })(0);
+    })));
+  }
+  let photoMode = false;
+
+  /* ---- fecha ---- */
+  const fmtDate = iso => {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  };
+
+  /* ---- selección de preguntas: 10 al azar, máx. 2 por autor ---- */
+  function pickQuestions() {
+    const pool = shuffle(D.qs.filter(q => !photoMode || PHOTO[q.a])), out = [], per = {};
+    for (const q of pool) {
+      if ((per[q.a] || 0) >= MAX_PER_AUTHOR) continue;
+      per[q.a] = (per[q.a] || 0) + 1;
+      out.push(q);
+      if (out.length === ROUNDS) break;
+    }
+    return out;
+  }
+
+  /* ---- 4 opciones: la correcta + 3 que estuvieran activos ese año, sin repetir "familia" de nombre ---- */
+  function buildOptions(q) {
+    const year = q.d.slice(0, 4);
+    const active = (D.act[year] || D.members.map(m => m.id)).filter(id => id !== q.a && (!photoMode || PHOTO[id]));
+    const usedGroups = new Set(); const g0 = groupOf(q.a); if (g0 >= 0) usedGroups.add(g0);
+    const chosen = [];
+    for (const id of shuffle(active)) {
+      const g = groupOf(id);
+      if (g >= 0) { if (usedGroups.has(g)) continue; usedGroups.add(g); }
+      chosen.push(id);
+      if (chosen.length === OPTIONS - 1) break;
+    }
+    return shuffle([q.a, ...chosen]);
+  }
+
+  /* ---- estado ---- */
+  let Q = [], idx = 0, answers = [], locked = false;
+
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === id));
+    window.scrollTo({ top: 0 });
+  }
+
+  async function start() {
+    await probePhotos();
+    photoMode = Object.keys(PHOTO).length >= 8;
+    Q = pickQuestions().map(q => ({ ...q, opts: buildOptions(q) }));
+    idx = 0; answers = [];
+    show('s-game');
+    render();
+  }
+
+  function render() {
+    locked = false;
+    const q = Q[idx];
+    $('count').textContent = `${idx + 1}/${Q.length}`;
+    $('bar').style.width = `${(idx / Q.length) * 100}%`;
+    $('date').textContent = fmtDate(q.d);
+    $('text').textContent = q.t;
+    $('next').classList.remove('on');
+    const box = $('opts'); box.innerHTML = '';
+    box.classList.toggle('photos', photoMode);
+    q.opts.forEach(id => {
+      const b = document.createElement('button');
+      b.dataset.id = id; b.setAttribute('aria-label', M[id].n);
+      if (photoMode) {
+        b.className = 'opt ph';
+        const bg = document.createElement('div'); bg.className = 'bgb'; bg.style.backgroundImage = `url("${PHOTO[id]}")`; b.appendChild(bg);
+        const im = new Image(); im.src = PHOTO[id]; im.alt = ''; b.appendChild(im);
+        const k = document.createElement('span'); k.className = 'tick'; k.textContent = '✓'; b.appendChild(k);
+      } else {
+        b.className = 'opt';
+        b.appendChild(avatar(id));
+        const n = document.createElement('span'); n.className = 'nm'; n.textContent = M[id].n;
+        b.appendChild(n);
+      }
+      b.addEventListener('click', () => answer(id));
+      box.appendChild(b);
+    });
+  }
+
+  /* Sin feedback: solo se marca la elección (se puede cambiar antes de pulsar Siguiente). */
+  function answer(id) {
+    const q = Q[idx];
+    answers[idx] = { q, pick: id, ok: id === q.a };
+    document.querySelectorAll('#opts .opt').forEach(b => b.classList.toggle('sel', b.dataset.id === id));
+    $('bar').style.width = `${((idx + 1) / Q.length) * 100}%`;
+    $('next').textContent = idx === Q.length - 1 ? 'Ver resultado' : 'Siguiente →';
+    $('next').classList.add('on');
+  }
+
+  function verdictFor(n) {
+    if (n === 10) return '¡Perfecto! Los conoces mejor que sus madres.';
+    if (n >= 8) return 'Casi clavado. Se nota que no te pierdes un mensaje.';
+    if (n >= 6) return 'Bien, pero algún que otro te ha engañado.';
+    if (n >= 4) return 'Justito. Lee más el grupo.';
+    if (n >= 2) return 'Flojo… ¿seguro que estás en el chat?';
+    return 'Cero patatero. ¿Estás en el grupo correcto?';
+  }
+
+  function chip(id, cls, label) {
+    const c = document.createElement('span'); c.className = 'chip ' + cls;
+    const l = document.createElement('span'); l.className = 'lbl'; l.textContent = label;
+    c.appendChild(l); c.appendChild(avatar(id, true));
+    const n = document.createElement('span'); n.textContent = M[id].n; c.appendChild(n);
+    return c;
+  }
+
+  function finish() {
+    const score = answers.filter(a => a.ok).length;
+    $('final').textContent = score;
+    $('verdict').textContent = verdictFor(score);
+    const list = $('list'); list.innerHTML = '';
+    answers.forEach((a, i) => {
+      const r = document.createElement('div'); r.className = 'row' + (a.ok ? ' ok' : '');
+      const d = document.createElement('div'); d.className = 'd'; d.textContent = `${i + 1}. ${fmtDate(a.q.d)}`;
+      const msg = document.createElement('p'); msg.className = 'msg'; msg.textContent = a.q.t;
+      r.appendChild(d); r.appendChild(msg);
+      if (a.q.t.length > 150 || a.q.t.split('\n').length > 3) {
+        const t = document.createElement('button'); t.className = 'toggle'; t.textContent = 'Ver entero';
+        t.addEventListener('click', () => { const o = msg.classList.toggle('open'); t.textContent = o ? 'Ver menos' : 'Ver entero'; });
+        r.appendChild(t);
+      }
+      const ans = document.createElement('div'); ans.className = 'ans';
+      if (a.ok) ans.appendChild(chip(a.q.a, 'good', 'Acertaste'));
+      else { ans.appendChild(chip(a.pick, 'bad', 'Tú')); ans.appendChild(chip(a.q.a, 'good', 'Era')); }
+      r.appendChild(ans);
+      list.appendChild(r);
+    });
+    show('s-end');
+  }
+
+  $('play').addEventListener('click', start);
+  $('again').addEventListener('click', start);
+  $('next').addEventListener('click', () => {
+    if (!answers[idx]) return;
+    if (idx === Q.length - 1) finish(); else { idx++; render(); }
+  });
+  $('share').addEventListener('click', async () => {
+    const score = answers.filter(a => a.ok).length;
+    const squares = answers.map(a => a.ok ? '🟩' : '🟥').join('');
+    const text = `¿Quién lo dijo? · Bultallas\n${score}/10 ${squares}`;
+    try {
+      if (navigator.share) await navigator.share({ text });
+      else { await navigator.clipboard.writeText(text); $('share').textContent = '¡Copiado!'; setTimeout(() => $('share').textContent = 'Compartir resultado', 1600); }
+    } catch (e) { /* cancelado */ }
+  });
+  document.addEventListener('keydown', e => {
+    if (!$('s-game').classList.contains('on')) return;
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= OPTIONS && Q[idx].opts[n - 1]) answer(Q[idx].opts[n - 1]);
+    else if (e.key === 'Enter' && answers[idx]) $('next').click();
+    
+  });
+})();
+</script>
+</body>
+</html>
